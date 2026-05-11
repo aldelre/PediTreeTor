@@ -1,0 +1,24 @@
+"id","label","sex","father","mother","status","carrier","phenotype","variant","visible"
+"APG_padre","Padre",1,"","","unknown","unknown","","",TRUE
+"APG_madre","Madre",2,"","","unknown","unknown","","",TRUE
+"APG","APG
+ID1",1,"APG_padre","APG_madre","affected","carrier","Sordera","WFS1 c.1949A>C
+p.Tyr650Ser",TRUE
+"GPG","GPG
+ID2",1,"APG_padre","APG_madre","affected","carrier","Sordera","WFS1 c.1949A>C
+p.Tyr650Ser",TRUE
+"Conyuge_APG","Pareja APG",2,"","","unknown","unknown","","",TRUE
+"GPG2","GPG2
+ID3",1,"APG","Conyuge_APG","unaffected","noncarrier","Sano","No portador",TRUE
+"JPG","JPG
+ID4",1,"APG","Conyuge_APG","unaffected","carrier","Sano","WFS1 c.1949A>C
+p.Tyr650Ser",TRUE
+"MPG","MPG
+ID5",2,"APG","Conyuge_APG","unaffected","noncarrier","Sano","No portador",TRUE
+"APG_tio_paterno","Tío paterno",1,"APG_padre","APG_madre","unknown","unknown","","",TRUE
+"APG_pareja_tio_paterno","Pareja tío",2,"","","unknown","unknown","","",TRUE
+"TSP","TSP",2,"APG_tio_paterno","APG_pareja_tio_paterno","affected","noncarrier","Sordera","WFS1 c.1949A>C
+p.Tyr650Ser",TRUE
+"Conyuge_TSP","Pareja TSP",1,"","","unknown","unknown","","",TRUE
+"ASS_hijo","ASS",1,"Conyuge_TSP","TSP","unaffected","noncarrier","Sano","No portador",TRUE
+"ASS_hija","ASS",2,"Conyuge_TSP","TSP","unaffected","noncarrier","Sano","No portador",TRUE
