@@ -155,7 +155,7 @@ Ver archivo LICENSE.
 
 # Autor
 
-Álvaro
+Álvaro del Real
 
 Aplicación desarrollada para visualización de pedigríes clínicos y familiares en genética médica.
 
