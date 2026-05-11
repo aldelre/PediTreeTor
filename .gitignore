@@ -1,0 +1,29 @@
+# Historial y entorno de R
+.Rhistory
+.RData
+.Ruserdata
+
+# RStudio
+.Rproj.user/
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+# Archivos generados
+*.png
+*.svg
+
+# Dependencias locales
+renv/library/
+renv/staging/
+
+# Logs
+*.log
