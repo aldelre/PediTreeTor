@@ -26,6 +26,19 @@ ui <- fluidPage(
     titlePanel("Árbol genealógico interactivo"),
     sidebarLayout(
       sidebarPanel(
+        h4("Opciones de visualización"),
+        checkboxInput("show_text", "Mostrar texto bajo los símbolos", value = TRUE),
+        selectInput(
+          "plot_language",
+          "Idioma de las etiquetas",
+          choices = c("Español" = "es", "English" = "en"),
+          selected = "es"
+        ),
+        checkboxInput("show_variant_in_plot", "Mostrar variantes", value = TRUE),
+        checkboxInput("show_phenotype_in_plot", "Mostrar fenotipo", value = TRUE),
+        checkboxInput("show_carrier_in_plot", "Mostrar estado de portador", value = TRUE),
+        hr(),
+        
         h4("Importar datos"),
         fileInput("upload_csv", "Cargar CSV", accept = c(".csv")),
         checkboxInput("header_csv", "El CSV tiene encabezados", value = TRUE),
@@ -128,6 +141,14 @@ ui <- fluidPage(
   
   server <- function(input, output, session) {
     rv <- reactiveValues(data = empty_family(), selected = NULL, proband = "APG")
+    
+    tr <- function(es, en) {
+      if (input$plot_language == "en") {
+        en
+      } else {
+        es
+      }
+    }
     
     add_or_update <- function(row) {
       existing <- which(rv$data$id == row$id)
@@ -286,17 +307,17 @@ ui <- fluidPage(
       
       if (rel == "father") {
         id <- parents$father
-        label <- "Padre"
+        label <- tr("Padre", "Father")
       }
       
       if (rel == "mother") {
         id <- parents$mother
-        label <- "Madre"
+        label <- tr("Madre", "Mother")
       }
       
       if (rel == "paternal_uncle") {
         id <- paste0(pid, "_tio_paterno")
-        label <- ifelse(input$label == "", "Tío/a paterno/a", input$label)
+        label <- ifelse(input$label == "", tr("Tío/a paterno/a", "Paternal uncle/aunt"), input$label)
         father <- parents$father
         mother <- parents$mother
       }
@@ -304,7 +325,7 @@ ui <- fluidPage(
       if (rel == "paternal_cousin") {
         uncle <- paste0(pid, "_tio_paterno")
         aunt_partner <- paste0(pid, "_pareja_tio_paterno")
-        ensure_person(uncle, "Tío/a paterno/a", 3)
+        ensure_person(uncle, tr("Tío/a paterno/a", "Paternal uncle/aunt"), 3)
         ensure_person(aunt_partner, "Pareja tío/a paterno/a", 3)
         idx_uncle <- which(rv$data$id == uncle)
         rv$data$father[idx_uncle] <- parents$father
@@ -318,9 +339,9 @@ ui <- fluidPage(
         cousin_partner <- paste0(id, "_otro_progenitor")
         uncle <- paste0(pid, "_tio_paterno")
         aunt_partner <- paste0(pid, "_pareja_tio_paterno")
-        ensure_person(uncle, "Tío/a paterno/a", 3)
+        ensure_person(uncle, tr("Tío/a paterno/a", "Paternal uncle/aunt"), 3)
         ensure_person(aunt_partner, "Pareja tío/a paterno/a", 3)
-        ensure_person(cousin, "Primo/a paterno/a", 3)
+        ensure_person(cousin, tr("Primo/a paterno/a", "Paternal cousin"), 3)
         ensure_person(cousin_partner, "Otro progenitor", 3)
         idx_uncle <- which(rv$data$id == uncle)
         rv$data$father[idx_uncle] <- parents$father
@@ -334,7 +355,7 @@ ui <- fluidPage(
       
       if (rel == "maternal_uncle") {
         id <- paste0(pid, "_tio_materno")
-        label <- ifelse(input$label == "", "Tío/a materno/a", input$label)
+        label <- ifelse(input$label == "", tr("Tío/a materno/a", "Maternal uncle/aunt"), input$label)
         father <- parents$father
         mother <- parents$mother
       }
@@ -342,7 +363,7 @@ ui <- fluidPage(
       if (rel == "maternal_cousin") {
         uncle <- paste0(pid, "_tio_materno")
         uncle_partner <- paste0(pid, "_pareja_tio_materno")
-        ensure_person(uncle, "Tío/a materno/a", 3)
+        ensure_person(uncle, tr("Tío/a materno/a", "Maternal uncle/aunt"), 3)
         ensure_person(uncle_partner, "Pareja tío/a materno/a", 3)
         idx_uncle <- which(rv$data$id == uncle)
         rv$data$father[idx_uncle] <- parents$father
@@ -356,9 +377,9 @@ ui <- fluidPage(
         cousin_partner <- paste0(id, "_otro_progenitor")
         uncle <- paste0(pid, "_tio_materno")
         uncle_partner <- paste0(pid, "_pareja_tio_materno")
-        ensure_person(uncle, "Tío/a materno/a", 3)
+        ensure_person(uncle, tr("Tío/a materno/a", "Maternal uncle/aunt"), 3)
         ensure_person(uncle_partner, "Pareja tío/a materno/a", 3)
-        ensure_person(cousin, "Primo/a materno/a", 3)
+        ensure_person(cousin, tr("Primo/a materno/a", "Maternal cousin"), 3)
         ensure_person(cousin_partner, "Otro progenitor", 3)
         idx_uncle <- which(rv$data$id == uncle)
         rv$data$father[idx_uncle] <- parents$father
@@ -482,20 +503,138 @@ ui <- fluidPage(
     })
     
     make_plot_labels <- function(df) {
-      carrier_txt <- ifelse(
-        df$carrier == "carrier", "",
-        ifelse(df$carrier == "noncarrier", "", "?")
+      
+      if (!isTRUE(input$show_text)) {
+        return(rep("", nrow(df)))
+      }
+      
+      # =========================
+      # Traducción automática
+      # =========================
+      
+      translate_auto_labels <- function(x) {
+        
+        if (input$plot_language != "en") {
+          return(x)
+        }
+        
+        x <- gsub("Padre", "Father", x)
+        x <- gsub("Madre", "Mother", x)
+        
+        x <- gsub("Tío paterno", "Paternal uncle", x)
+        x <- gsub("Tía paterna", "Paternal aunt", x)
+        x <- gsub("Tío/a paterno/a", "Paternal uncle/aunt", x)
+        
+        x <- gsub("Tío materno", "Maternal uncle", x)
+        x <- gsub("Tía materna", "Maternal aunt", x)
+        x <- gsub("Tío/a materno/a", "Maternal uncle/aunt", x)
+        
+        x <- gsub("Primo paterno", "Paternal cousin", x)
+        x <- gsub("Prima paterna", "Paternal cousin", x)
+        x <- gsub("Primo/a paterno/a", "Paternal cousin", x)
+        
+        x <- gsub("Primo materno", "Maternal cousin", x)
+        x <- gsub("Prima materna", "Maternal cousin", x)
+        x <- gsub("Primo/a materno/a", "Maternal cousin", x)
+        
+        x <- gsub("Pareja tío", "Uncle/aunt partner", x)
+        x <- gsub("Otro progenitor", "Other parent", x)
+        
+        x
+      }
+      
+      translate_phenotype <- function(x) {
+        
+        if (input$plot_language != "en") {
+          return(x)
+        }
+        
+        x <- gsub("Sordera", "Hearing loss", x)
+        x <- gsub("Sano", "Healthy", x)
+        
+        x
+      }
+      
+      # =========================
+      # Estado portador
+      # =========================
+      
+      carrier_txt <- if (input$plot_language == "en") {
+        
+        ifelse(
+          df$carrier == "carrier",
+          "Carrier",
+          ifelse(df$carrier == "noncarrier", "Non-carrier", "?")
+        )
+        
+      } else {
+        
+        ifelse(
+          df$carrier == "carrier",
+          "Portador",
+          ifelse(df$carrier == "noncarrier", "No portador", "?")
+        )
+      }
+      
+      # =========================
+      # Traducciones dinámicas
+      # =========================
+      
+      phenotype_txt <- ifelse(
+        df$phenotype != "",
+        translate_phenotype(df$phenotype),
+        ""
       )
       
-      phenotype_txt <- ifelse(df$phenotype != "", df$phenotype, "")
-      variant_txt <- ifelse(df$variant != "", gsub("\n", " | ", df$variant), "")
-      
-      paste0(
-        df$label,
-        #ifelse(phenotype_txt != "", paste0("\n", phenotype_txt), ""),
-        ifelse(carrier_txt != "", paste0("\n", carrier_txt), ""),
-        ifelse(variant_txt != "", paste0("\n", variant_txt), "")
+      variant_txt <- ifelse(
+        df$variant != "",
+        gsub("\n", " | ", df$variant),
+        ""
       )
+      
+      label <- translate_auto_labels(df$label)
+      
+      # =========================
+      # Construcción final
+      # =========================
+      
+      if (isTRUE(input$show_phenotype_in_plot)) {
+        
+        label <- paste0(
+          label,
+          ifelse(
+            phenotype_txt != "",
+            paste0("\n", phenotype_txt),
+            ""
+          )
+        )
+      }
+      
+      if (isTRUE(input$show_carrier_in_plot)) {
+        
+        label <- paste0(
+          label,
+          ifelse(
+            carrier_txt != "",
+            paste0("\n", carrier_txt),
+            ""
+          )
+        )
+      }
+      
+      if (isTRUE(input$show_variant_in_plot)) {
+        
+        label <- paste0(
+          label,
+          ifelse(
+            variant_txt != "",
+            paste0("\n", variant_txt),
+            ""
+          )
+        )
+      }
+      
+      label
     }
     
     plot_pedigree <- function(show_title = TRUE) {
@@ -522,7 +661,11 @@ ui <- fluidPage(
       
       legend(
         "bottomright",
-        legend = c("Afectado", "No afectado", "? = no estudiado"),
+        legend = if (input$plot_language == "en") {
+          c("Affected", "Unaffected", "? = not tested")
+        } else {
+          c("Afectado", "No afectado", "? = no estudiado")
+        },
         fill = c("black", "white", "white"),
         border = c("black", "black", NA),
         bty = "n",
@@ -570,4 +713,3 @@ ui <- fluidPage(
   
 
 shinyApp(ui = ui, server = server)
-
