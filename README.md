@@ -1,6 +1,9 @@
 # README.md
 
 # PediTreeTor Shiny App
+Not intended for clinical diagnosis.
+For research, teaching and visualization purposes only.
+
 
 Aplicación interactiva en **R Shiny** para construir y visualizar árboles genealógicos clínicos utilizando el paquete `kinship2`.
 
