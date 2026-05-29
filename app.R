@@ -5,6 +5,7 @@
 library(shiny)
 library(DT)
 library(kinship2)
+library(bslib)
 
 empty_family <- function() {
   data.frame(
@@ -23,6 +24,11 @@ empty_family <- function() {
 }
 
 ui <- fluidPage(
+  theme = bslib::bs_theme(
+    version = 5,
+    bootswatch = "minty",
+    primary = "#2C3E50"
+  ),
     titlePanel("Árbol genealógico interactivo"),
     sidebarLayout(
       sidebarPanel(
@@ -123,6 +129,10 @@ ui <- fluidPage(
       ),
       
       mainPanel(
+        div(
+          style = "text-align:center;",
+          plotOutput("pedigree_plot", height = "850px")
+        ),
         tabsetPanel(
           tabPanel("Árbol", plotOutput("pedigree_plot", height = "700px")),
           tabPanel("Tabla", DTOutput("family_table")),
@@ -650,8 +660,8 @@ ui <- fluidPage(
       plot(
         ped,
         id = make_plot_labels(df),
-        cex = 0.95,
-        symbolsize = 2.8,
+        cex = 0.85,
+        symbolsize = 2.3,
         lwd = 3
       )
       
@@ -713,3 +723,4 @@ ui <- fluidPage(
   
 
 shinyApp(ui = ui, server = server)
+
