@@ -109,7 +109,7 @@ R >= 4.1
 Paquetes necesarios:
 
 ```r
-install.packages(c("shiny", "DT", "kinship2"))
+install.packages(c("shiny", "DT", "kinship2", "bslib"))
 ```
 
 ---
