@@ -129,12 +129,14 @@ ui <- fluidPage(
       ),
       
       mainPanel(
-        div(
-          style = "text-align:center;",
-          plotOutput("pedigree_plot", height = "850px")
-        ),
         tabsetPanel(
-          tabPanel("Árbol", plotOutput("pedigree_plot", height = "700px")),
+          tabPanel(
+            "Árbol",
+            div(
+              style = "text-align:center;",
+              plotOutput("pedigree_plot", height = "850px")
+            )
+          ),
           tabPanel("Tabla", DTOutput("family_table")),
           tabPanel(
             "Ayuda",
